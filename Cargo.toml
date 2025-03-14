@@ -7,7 +7,7 @@ repository = "https://github.com/wnml-org/aws-rds-signer"
 license = "MIT"
 readme = "README.md"
 edition = "2021"
-categories = ["authentication", "database", "api-bindings", "Rust patterns"]
+categories = ["authentication", "database", "api-bindings", "rust-patterns"]
 keywords = [
   "aws",
   "rds",
