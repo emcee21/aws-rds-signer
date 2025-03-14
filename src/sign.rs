@@ -109,7 +109,7 @@ impl Signer {
 
         let mut url = url::Url::parse(&url).map_err(|e| super::Error::ParseError(e.to_string()))?;
         for (name, value) in signing_instructions.params() {
-            url.query_pairs_mut().append_pair(name, &value);
+            url.query_pairs_mut().append_pair(name, value);
         }
 
         let response = url.to_string().split_off("https://".len());
