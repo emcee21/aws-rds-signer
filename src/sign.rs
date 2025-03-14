@@ -1,3 +1,8 @@
+//! Implements the AWS RDS IAM authentication token generation.
+//! 
+//! This module provides the core functionality for generating authentication tokens
+//! that can be used to connect to AWS RDS instances using IAM authentication.
+
 use std::time::Duration;
 use std::time::SystemTime;
 
@@ -6,26 +11,27 @@ use aws_credential_types::provider::ProvideCredentials;
 use aws_sigv4::http_request::{sign, SignableBody, SignableRequest, SigningSettings};
 use aws_sigv4::sign::v4;
 
+/// A configured signer for generating RDS IAM authentication tokens.
+/// 
+/// The signer contains all the necessary configuration to generate authentication
+/// tokens for connecting to an RDS instance. It can be created using the builder
+/// pattern via [`SignerBuilder`].
+#[derive(Debug)]
 pub struct Signer {
-    /**
-     * Required. The duration of the token in seconds. Defaults to 900 seconds.
-     */
+    /// The duration for which the generated token will be valid.
+    /// Defaults to 900 seconds (15 minutes).
     expires_in: Duration,
-    /**
-     * Required. The hostname of the database to connect to.
-     */
+    /// The hostname of the RDS instance to connect to.
+    /// This should be the endpoint provided by AWS.
     host: String,
-    /**
-     * Required. The port number the database is listening on.
-     */
+    /// The port number the database is listening on.
+    /// Common values are 5432 for PostgreSQL and 3306 for MySQL.
     port: u16,
-    /**
-     * Required. The username to login as.
-     */
+    /// The database user to authenticate as.
+    /// This user must be configured in RDS with IAM authentication enabled.
     user: String,
-    /**
-     * Optional. The region the database is located in. Uses the region inferred from the runtime if omitted.
-     */
+    /// The AWS region where the RDS instance is located.
+    /// If not provided, will attempt to use the region from AWS configuration.
     region: Option<String>,
 }
 
@@ -41,27 +47,93 @@ impl Default for Signer {
     }
 }
 
+/// Builder for creating a configured [`Signer`].
+/// 
+/// Provides a fluent interface for setting all necessary configuration
+/// parameters for the signer.
+#[derive(Debug)]
+pub struct SignerBuilder {
+    signer: Signer,
+}
+
+impl SignerBuilder {
+    /// Creates a new SignerBuilder with default values.
+    fn new() -> Self {
+        Self {
+            signer: Signer::default(),
+        }
+    }
+
+    /// Sets the token expiration duration.
+    /// 
+    /// # Arguments
+    /// * `expires_in` - The duration for which the token will be valid
+    pub fn expires_in(mut self, expires_in: impl Into<Duration>) -> Self {
+        self.signer.expires_in = expires_in.into();
+        self
+    }
+
+    /// Sets the RDS instance hostname.
+    /// 
+    /// # Arguments
+    /// * `host` - The RDS endpoint (e.g., "mydb.123456789012.us-east-1.rds.amazonaws.com")
+    pub fn host(mut self, host: impl Into<String>) -> Self {
+        self.signer.host = host.into();
+        self
+    }
+
+    /// Sets the database port number.
+    /// 
+    /// # Arguments
+    /// * `port` - The port number (e.g., 5432 for PostgreSQL)
+    pub fn port(mut self, port: impl Into<u16>) -> Self {
+        self.signer.port = port.into();
+        self
+    }
+
+    /// Sets the AWS region.
+    /// 
+    /// # Arguments
+    /// * `region` - The AWS region (e.g., "us-east-1")
+    pub fn region(mut self, region: impl Into<String>) -> Self {
+        self.signer.region = Some(region.into());
+        self
+    }
+
+    /// Sets the database username.
+    /// 
+    /// # Arguments
+    /// * `user` - The database user to authenticate as
+    pub fn user(mut self, user: impl Into<String>) -> Self {
+        self.signer.user = user.into();
+        self
+    }
+
+    /// Builds the final [`Signer`] instance.
+    pub fn build(self) -> Signer {
+        self.signer
+    }
+}
+
 impl Signer {
-    pub fn expires_in(&mut self, expires_in: Duration) -> &mut Self {
-        self.expires_in = expires_in;
-        self
+    /// Creates a new SignerBuilder for configuring a Signer instance.
+    pub fn builder() -> SignerBuilder {
+        SignerBuilder::new()
     }
-    pub fn host(&mut self, host: String) -> &mut Self {
-        self.host = host;
-        self
-    }
-    pub fn port(&mut self, port: u16) -> &mut Self {
-        self.port = port;
-        self
-    }
-    pub fn region(&mut self, region: Option<String>) -> &mut Self {
-        self.region = region;
-        self
-    }
-    pub fn user(&mut self, user: String) -> &mut Self {
-        self.user = user;
-        self
-    }
+
+    /// Generates an authentication token for connecting to the RDS instance.
+    /// 
+    /// This method will use the configured AWS credentials to generate a signed
+    /// authentication token that can be used to connect to the RDS instance.
+    /// The token is valid for the duration specified in the configuration.
+    /// 
+    /// # Returns
+    /// * `Ok(String)` - The authentication token
+    /// * `Err(Error)` - If token generation fails
+    /// 
+    /// # Errors
+    /// * `SignerError` - If signing the request fails
+    /// * `ParseError` - If URL parsing fails
     pub async fn fetch_token(&self) -> Result<String, super::Error> {
         let config = aws_config::load_defaults(BehaviorVersion::v2025_01_17()).await;
         let credentials = config

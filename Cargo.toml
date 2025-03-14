@@ -1,6 +1,6 @@
 [package]
 name = "aws-rds-signer"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Michael Cervantes"]
 description = "A Rust library for generating AWS IAM authentication tokens for Amazon RDS database connections"
 repository = "https://github.com/wnml-org/aws-rds-signer"
@@ -27,3 +27,19 @@ url = "2.4.1"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+missing_debug_implementations = "deny"
+missing_copy_implementations = "warn"
+unreachable_pub = "warn"
+
+[lints.clippy]
+pedantic = "deny"
+nursery = "warn"
+cargo = "warn"
+complexity = "warn"
+perf = "warn"
+style = "deny"
+suspicious = "deny"
