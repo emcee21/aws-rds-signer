@@ -4,7 +4,6 @@ use super::*;
 
 #[tokio::test]
 async fn test() -> Result<(), Error> {
-
     let host = std::env::var("DB_HOST").unwrap();
     let user = std::env::var("DB_USER").unwrap();
     let region = std::env::var("DB_REGION").unwrap();

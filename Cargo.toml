@@ -15,15 +15,17 @@ keywords = [
   "database",
   "postgres",
 ]
+# Add resolver v2 to help with dependency resolution
+resolver = "2"
 
 [lib]
 crate-type = ["lib"]
 
 [dependencies]
-aws-config = "1.6.0"
-aws-credential-types = "1.2.2"
-aws-sigv4 = "1.3.0"
-url = "2.4.1"
+aws-config = { version = "1" }
+aws-credential-types = "1"
+aws-sigv4 = "1"
+url = "2"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }

@@ -2,25 +2,26 @@
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 #![forbid(unsafe_code)]
+#![allow(clippy::multiple_crate_versions)]
 
 //! # AWS RDS Signer
-//! 
+//!
 //! A Rust library for generating AWS IAM authentication tokens for Amazon RDS database connections.
 //! This crate provides a secure and efficient way to generate authentication tokens for RDS IAM
 //! database authentication.
-//! 
+//!
 //! ## Features
-//! 
+//!
 //! - Generate IAM authentication tokens for RDS database connections
 //! - Support for AWS credentials from environment, instance profiles, and explicit configuration
 //! - Thread-safe and async-ready implementation
 //! - Zero unsafe code
-//! 
+//!
 //! ## Example
-//! 
+//!
 //! ```rust,no_run
 //! use aws_rds_signer::{Signer, SignerBuilder};
-//! 
+//!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     let signer = Signer::builder()
@@ -29,7 +30,7 @@
 //!         .port(5432u16)
 //!         .user("my_user")
 //!         .build();
-//!     
+//!
 //!     let token = signer.fetch_token().await?;
 //!     println!("Authentication token: {}", token);
 //!     Ok(())
@@ -57,9 +58,9 @@ pub enum Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::ParseError(e) => write!(f, "ParseError: {}", e),
-            Error::SignerError(e) => write!(f, "SignerError: {}", e),
-            Error::EnvVarError(e) => write!(f, "EnvVarError: {}", e),
+            Self::ParseError(e) => write!(f, "ParseError: {e}"),
+            Self::SignerError(e) => write!(f, "SignerError: {e}"),
+            Self::EnvVarError(e) => write!(f, "EnvVarError: {e}"),
         }
     }
 }
