@@ -10,14 +10,10 @@ edition = "2021"
 categories = ["authentication", "database", "api-bindings", "Rust patterns"]
 keywords = [
   "aws",
-  "db",
   "rds",
-  "signer",
   "iam",
   "database",
-  "auth",
   "postgres",
-  "token",
 ]
 
 [lib]
